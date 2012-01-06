@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 using Should.Extensions.AssertExtensions;
 
@@ -32,23 +33,23 @@ namespace EmptyProject.Tests
 
         private void Given_a_salaried_employee_whose_salary_is_60000()
         {
-            _employee = new SalariedEmployee {Salary = 60000};
+            _employee = new SalariedEmployee { Salary = 60000 };
         }
 
         private void Given_the_employee_has_worked_85_hours_in_the_pay_period()
         {
-            _timecard = new Timecard {Employee = _employee, HoursWorked = 85};
+            _timecard = new Timecard { Employee = _employee, HoursWorked = 85 };
         }
 
         private void When_I_run_payroll()
         {
             var system = new PayrollSystem();
-            _payrollResult = system.RunPayroll(_payPeriod, new[] {_timecard});
+            _payrollResult = system.RunPayroll(_payPeriod, new[] { _timecard });
         }
 
         private void Then_the_employee_should_be_paid_the_hourly_rate_for_all_hours_worked_in_the_pay_period()
         {
-            _payrollResult.GetAmountEmployeeWasPaid(_employee).ShouldEqual(60000m/2080*85);
+            _payrollResult.GetAmountEmployeeWasPaid(_employee).ShouldEqual(60000m / 2080 * 85);
         }
 
     }
@@ -62,17 +63,47 @@ namespace EmptyProject.Tests
 
     public class PayrollSystem
     {
+        private const decimal HoursPerYear = 2080;
+
         public PayrollResult RunPayroll(BiWeeklyPayPeriod payPeriod, IEnumerable<Timecard> timecards)
         {
-            
+            var result = new PayrollResult();
+            foreach (var timecard in timecards)
+            {
+                result.Paychecks.Add(new Paycheck
+                                         {
+                                             Employee = timecard.Employee, 
+                                             Amount = CalculatePay(timecard, payPeriod)
+                                         });
+            }
+            return result;
         }
+
+        private decimal CalculatePay(Timecard timecard, BiWeeklyPayPeriod payPeriod)
+        {
+            return timecard.Employee.Salary / HoursPerYear * timecard.HoursWorked;
+        }
+    }
+
+    public class Paycheck
+    {
+        public SalariedEmployee Employee { get; set; }
+        public decimal Amount { get; set; }
     }
 
     public class PayrollResult
     {
+        public IList<Paycheck> Paychecks { get; private set; }
+
+        public PayrollResult()
+        {
+            Paychecks = new List<Paycheck>();
+        }
+
         public decimal GetAmountEmployeeWasPaid(SalariedEmployee employee)
         {
-            throw new NotImplementedException();
+            var paycheck = Paychecks.SingleOrDefault(p => p.Employee == employee);
+            return paycheck != null ? paycheck.Amount : 0;
         }
     }
 
