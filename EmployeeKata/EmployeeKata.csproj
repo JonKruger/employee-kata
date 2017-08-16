@@ -40,9 +40,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Employee.cs" />
+    <Compile Include="HourlyEmployee.cs" />
     <Compile Include="IPayrollService.cs" />
     <Compile Include="EmployeeType.cs" />
+    <Compile Include="PayPeriod.cs" />
+    <Compile Include="PayrollService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PayableHours.cs" />
+    <Compile Include="SalariedEmployee.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
